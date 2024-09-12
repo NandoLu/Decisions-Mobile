@@ -17,10 +17,14 @@ const Game = () => {
     setTaxModalVisible(false);
   };
 
-  const handleDecree = (revenue: any, powerCost: number) => {
+  const handleDecree = (revenue: any, powerCost: number, popularityChange: any) => {
     setState((prevState) => {
-      const newState = { ...prevState, revenue: revenue, powerPoints: prevState.powerPoints - powerCost };
-      console.log('New state after decree:', newState);
+      const newState = { ...prevState, revenue: revenue, 
+        powerPoints: prevState.powerPoints - powerCost,
+        popularityChange: popularityChange,};
+      // console.log('New state after decree:', newState);
+      
+      
       return newState;
     });
     handleAdvanceTurn();
@@ -29,7 +33,7 @@ const Game = () => {
   const handleAdvanceTurn = () => {
     setState((prevState) => {
       const newState = advanceTurn(prevState);
-      console.log('State after advancing turn:', newState);
+      // console.log('State after advancing turn:', newState);
       return newState;
     });
   };
@@ -78,7 +82,7 @@ const Game = () => {
       {/* Barra Inferior */}
       <View style={styles.bottomBar}>
         <Text style={styles.bottomBarText}>{state.economy.toLocaleString('pt-BR')} M</Text>
-        <Text style={styles.bottomBarText}>{state.popularity}%</Text>
+        <Text style={styles.bottomBarText}>{state.popularity.toFixed(0)}%</Text>
         <Text style={styles.bottomBarText}>{`${state.year}, ${['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][state.month]}`}</Text>
       </View>
 
@@ -110,11 +114,20 @@ const Game = () => {
           <View style={styles.gameOverContent}>
             <Image source={require('@/assets/images/balanca.png')} style={styles.gameOverImage} />
             <Text style={styles.gameOverText}>{state.gameOverMessage}</Text>
-            <Link href="/cenario" asChild>
-              <TouchableOpacity style={styles.closeButton}>
+            {state.popularity > 50 ? (
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setState((prevState) => ({ ...prevState, gameOver: false }))}
+              >
                 <Text style={styles.closeButtonText}>Fechar</Text>
               </TouchableOpacity>
-            </Link>
+            ) : (
+              <Link href="/cenario" asChild>
+                <TouchableOpacity style={styles.closeButton}>
+                  <Text style={styles.closeButtonText}>Fechar</Text>
+                </TouchableOpacity>
+              </Link>
+            )}
           </View>
         </View>
       </Modal>

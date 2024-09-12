@@ -6,7 +6,7 @@ import styles from './taxModalStyles';
 interface TaxModalProps {
   visible: boolean;
   onClose: () => void;
-  onDecree: (revenue: number, powerCost: number) => void;
+  onDecree: (revenue: number, powerCost: number, popularityChange: number) => void;
   powerPoints: number; // Adicionando pontos de poder como prop
 }
 
@@ -59,6 +59,8 @@ const TaxModal: React.FC<TaxModalProps> = ({ visible, onClose, onDecree, powerPo
     setDecreeEnabled(cost <= powerPoints);
   };
 
+
+
   const handleDecree = () => {
     if (powerCost > powerPoints) {
       Alert.alert("Poder insuficiente para decretar");
@@ -70,9 +72,28 @@ const TaxModal: React.FC<TaxModalProps> = ({ visible, onClose, onDecree, powerPo
     revenue += middleIncome * 3;
     revenue += highIncome * 6;
     revenue += sellIncome * 5;
+
+    let popularityChange = 0;
+
+    if (lowIncome === 0) {
+      popularityChange += 4;
+    } else {
+      popularityChange -= lowIncome * 0.5;
+    }
+    if (middleIncome === 0) {
+      popularityChange += 3;
+    } else {
+      popularityChange -= middleIncome * 0.3;
+    }
+    if (highIncome === 0) {
+      popularityChange += 2;
+    } else {
+      popularityChange -= highIncome * 0.2;
+    }
+
   
     setPreviousValues({ lowIncome, middleIncome, highIncome, sellIncome });
-    onDecree(revenue, powerCost);
+    onDecree(revenue, powerCost, popularityChange);
     setChangedSlider(null);
     setDecreeEnabled(false);
   };

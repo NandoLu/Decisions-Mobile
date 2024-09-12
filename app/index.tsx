@@ -5,6 +5,7 @@ import styles from '../typeScript/styles';
 
 const App = () => {
   return (
+    
     <View style={styles.container}>
       <StatusBar backgroundColor="black" barStyle="light-content" />
       <Image source={require('@/assets/images/balanca.png')} style={styles.icon} />

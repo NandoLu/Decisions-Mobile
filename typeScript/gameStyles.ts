@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    textAlign: 'center',
     marginBottom: 20,
     marginTop: 120, // Distancia os ícones centrais da barra superior
   },
