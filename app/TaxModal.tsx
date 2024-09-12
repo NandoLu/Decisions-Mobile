@@ -1,21 +1,81 @@
-import React, { useState } from 'react';
-import { Modal, View, Text, TouchableOpacity, StatusBar, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Modal, View, Text, TouchableOpacity, StatusBar, ScrollView, Alert } from 'react-native';
 import Slider from '@react-native-community/slider';
 import styles from './taxModalStyles';
 
 interface TaxModalProps {
   visible: boolean;
   onClose: () => void;
-  onDecree: () => void;
+  onDecree: (revenue: number, powerCost: number) => void;
+  powerPoints: number; // Adicionando pontos de poder como prop
 }
 
-const TaxModal: React.FC<TaxModalProps> = ({ visible, onClose, onDecree }) => {
+const TaxModal: React.FC<TaxModalProps> = ({ visible, onClose, onDecree, powerPoints }) => {
   const [lowIncome, setLowIncome] = useState(0);
   const [middleIncome, setMiddleIncome] = useState(0);
   const [highIncome, setHighIncome] = useState(0);
-  const [salesTax, setSalesTax] = useState(0);
-  const [inheritanceTax, setInheritanceTax] = useState(0);
-  const [corporateTax, setCorporateTax] = useState(0);
+  const [sellIncome, setSellIncome] = useState(0);
+  const [previousValues, setPreviousValues] = useState({ lowIncome: 0, middleIncome: 0, highIncome: 0 , sellIncome: 0 });
+  const [changedSlider, setChangedSlider] = useState<string | null>(null);
+  const [decreeEnabled, setDecreeEnabled] = useState(false);
+  const [powerCost, setPowerCost] = useState(0);
+
+  useEffect(() => {
+    if (!visible) {
+      // Resetar valores ao fechar o modal
+      setLowIncome(previousValues.lowIncome);
+      setMiddleIncome(previousValues.middleIncome);
+      setHighIncome(previousValues.highIncome);
+      setSellIncome(previousValues.sellIncome);
+      setChangedSlider(null);
+      setDecreeEnabled(false);
+      setPowerCost(0);
+    }
+  }, [visible]);
+
+  const handleSliderChange = (value: number, slider: string) => {
+    setChangedSlider(slider);
+    setDecreeEnabled(true);
+
+    let cost = 0;
+    if (slider === 'lowIncome') {
+      cost = Math.abs(value - previousValues.lowIncome);
+      setLowIncome(value);
+    }
+    if (slider === 'middleIncome') {
+      cost = Math.abs(value - previousValues.middleIncome);
+      setMiddleIncome(value);
+    }
+    if (slider === 'highIncome') {
+      cost = Math.abs(value - previousValues.highIncome);
+      setHighIncome(value);
+    }
+    if (slider === 'sellIncome') {
+      cost = Math.abs(value - previousValues.sellIncome);
+      setSellIncome(value);
+    }
+
+    setPowerCost(cost);
+    setDecreeEnabled(cost <= powerPoints);
+  };
+
+  const handleDecree = () => {
+    if (powerCost > powerPoints) {
+      Alert.alert("Poder insuficiente para decretar");
+      return;
+    }
+
+    let revenue = 0;
+    revenue += lowIncome * 1;
+    revenue += middleIncome * 3;
+    revenue += highIncome * 6;
+    revenue += sellIncome * 5;
+  
+    setPreviousValues({ lowIncome, middleIncome, highIncome, sellIncome });
+    onDecree(revenue, powerCost);
+    setChangedSlider(null);
+    setDecreeEnabled(false);
+  };
 
   return (
     <Modal
@@ -38,7 +98,8 @@ const TaxModal: React.FC<TaxModalProps> = ({ visible, onClose, onDecree }) => {
                   maximumValue={10}
                   step={1}
                   value={lowIncome}
-                  onValueChange={setLowIncome}
+                  onValueChange={(value) => handleSliderChange(value, 'lowIncome')}
+                  disabled={changedSlider !== null && changedSlider !== 'lowIncome'}
                 />
                 <Text style={styles.textModal}>Média Renda</Text>
                 <Slider
@@ -47,7 +108,8 @@ const TaxModal: React.FC<TaxModalProps> = ({ visible, onClose, onDecree }) => {
                   maximumValue={10}
                   step={1}
                   value={middleIncome}
-                  onValueChange={setMiddleIncome}
+                  onValueChange={(value) => handleSliderChange(value, 'middleIncome')}
+                  disabled={changedSlider !== null && changedSlider !== 'middleIncome'}
                 />
                 <Text style={styles.textModal}>Alta Renda</Text>
                 <Slider
@@ -56,34 +118,18 @@ const TaxModal: React.FC<TaxModalProps> = ({ visible, onClose, onDecree }) => {
                   maximumValue={10}
                   step={1}
                   value={highIncome}
-                  onValueChange={setHighIncome}
+                  onValueChange={(value) => handleSliderChange(value, 'highIncome')}
+                  disabled={changedSlider !== null && changedSlider !== 'highIncome'}
                 />
-                <Text style={styles.textModal}>Impostos sobre Vendas</Text>
+                <Text style={styles.textModal}>Imposto sobre Vendas</Text>
                 <Slider
                   style={styles.slider}
                   minimumValue={0}
                   maximumValue={10}
                   step={1}
-                  value={salesTax}
-                  onValueChange={setSalesTax}
-                />
-                <Text style={styles.textModal}>Impostos sobre Herança</Text>
-                <Slider
-                  style={styles.slider}
-                  minimumValue={0}
-                  maximumValue={10}
-                  step={1}
-                  value={inheritanceTax}
-                  onValueChange={setInheritanceTax}
-                />
-                <Text style={styles.textModal}>Impostos sobre Faturamento</Text>
-                <Slider
-                  style={styles.slider}
-                  minimumValue={0}
-                  maximumValue={10}
-                  step={1}
-                  value={corporateTax}
-                  onValueChange={setCorporateTax}
+                  value={sellIncome}
+                  onValueChange={(value) => handleSliderChange(value, 'sellIncome')}
+                  disabled={changedSlider !== null && changedSlider !== 'sellIncome'}
                 />
               </View>
             </View>
@@ -92,9 +138,14 @@ const TaxModal: React.FC<TaxModalProps> = ({ visible, onClose, onDecree }) => {
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
               <Text style={styles.closeButtonText}>Fechar</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.decreeButton} onPress={onDecree}>
+            <TouchableOpacity
+              style={[styles.decreeButton, !decreeEnabled && styles.decreeButtonDisabled]}
+              onPress={handleDecree}
+              disabled={!decreeEnabled}
+            >
               <Text style={styles.decreeButtonText}>Decretar</Text>
             </TouchableOpacity>
+            <Text style={styles.powerCostText}>Custo de Poder: {powerCost}</Text>
           </View>
         </View>
       </View>

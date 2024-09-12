@@ -116,6 +116,39 @@ const styles = StyleSheet.create({
   menuButtonText: {
     color: '#FFF',
   },
+  gameOverContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+  },
+  gameOverContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: 'darkgray',
+    borderRadius: 10,
+  },
+  gameOverImage: {
+    width: 100,
+    height: 100,
+    marginBottom: 20,
+  },
+  gameOverText: {
+    fontSize: 20,
+    color: 'white',
+    textAlign: 'center',
+  },
+  closeButton: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: 'red',
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
 });
 
 export default styles;

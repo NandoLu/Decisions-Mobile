@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { Text, View, Image, TouchableOpacity, StatusBar } from 'react-native';
+import { Text, View, Image, TouchableOpacity, StatusBar, Modal } from 'react-native';
+import { Link } from 'expo-router';
 import styles from '../typeScript/gameStyles';
 import TaxModal from './TaxModal';
+import { initialState, advanceTurn } from '../typeScript/GameLogic';
 
 const Game = () => {
+  const [state, setState] = useState(initialState);
   const [isTaxModalVisible, setTaxModalVisible] = useState(false);
 
   const openTaxModal = () => {
@@ -14,9 +17,21 @@ const Game = () => {
     setTaxModalVisible(false);
   };
 
-  const handleDecree = () => {
-    // Lógica para decretar os impostos
-    setTaxModalVisible(false);
+  const handleDecree = (revenue: any, powerCost: number) => {
+    setState((prevState) => {
+      const newState = { ...prevState, revenue: revenue, powerPoints: prevState.powerPoints - powerCost };
+      console.log('New state after decree:', newState);
+      return newState;
+    });
+    handleAdvanceTurn();
+  };
+
+  const handleAdvanceTurn = () => {
+    setState((prevState) => {
+      const newState = advanceTurn(prevState);
+      console.log('State after advancing turn:', newState);
+      return newState;
+    });
   };
 
   return (
@@ -30,9 +45,9 @@ const Game = () => {
         </View>
         <View style={styles.topBarItemInline}>
           <Image source={require('@/assets/images/getulio.jpg')} style={styles.imgCharacter} />
-          <Text style={styles.textCharacter}>Getúlio Vargas</Text>
+          <Text style={styles.textCharacter}>Getúlio Vargas {'\n'}Poder: {state.powerPoints}</Text>
         </View>
-        <TouchableOpacity style={styles.advanceButton}>
+        <TouchableOpacity style={styles.advanceButton} onPress={handleAdvanceTurn}>
           <Text style={styles.advanceButtonText}>Avançar</Text>
         </TouchableOpacity>
       </View>
@@ -62,9 +77,9 @@ const Game = () => {
 
       {/* Barra Inferior */}
       <View style={styles.bottomBar}>
-        <Text style={styles.bottomBarText}>100 M</Text>
-        <Text style={styles.bottomBarText}>51%</Text>
-        <Text style={styles.bottomBarText}>O ano, mês</Text>
+        <Text style={styles.bottomBarText}>{state.economy.toLocaleString('pt-BR')} M</Text>
+        <Text style={styles.bottomBarText}>{state.popularity}%</Text>
+        <Text style={styles.bottomBarText}>{`${state.year}, ${['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][state.month]}`}</Text>
       </View>
 
       {/* Botões Inferiores */}
@@ -82,7 +97,27 @@ const Game = () => {
       </View>
 
       {/* Modal de Impostos */}
-      <TaxModal visible={isTaxModalVisible} onClose={closeTaxModal} onDecree={handleDecree} />
+      <TaxModal visible={isTaxModalVisible} onClose={closeTaxModal} onDecree={handleDecree} powerPoints={state.powerPoints} />
+
+      {/* Modal de Fim de Jogo */}
+      <Modal
+        visible={state.gameOver}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => {}}
+      >
+        <View style={styles.gameOverContainer}>
+          <View style={styles.gameOverContent}>
+            <Image source={require('@/assets/images/balanca.png')} style={styles.gameOverImage} />
+            <Text style={styles.gameOverText}>{state.gameOverMessage}</Text>
+            <Link href="/cenario" asChild>
+              <TouchableOpacity style={styles.closeButton}>
+                <Text style={styles.closeButtonText}>Fechar</Text>
+              </TouchableOpacity>
+            </Link>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };

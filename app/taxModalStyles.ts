@@ -38,15 +38,6 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 15,
   },
-  checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  checkboxLabel: {
-    marginLeft: 8,
-    color: '#FFF',
-  },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -75,6 +66,13 @@ const styles = StyleSheet.create({
   decreeButtonText: {
     color: '#FFF',
     fontSize: 16,
+  },
+  decreeButtonDisabled: {
+    backgroundColor: '#d1d1d1',
+  },
+  powerCostText:{
+    fontSize: 5,
+    color: '#fff'
   },
 });
 
